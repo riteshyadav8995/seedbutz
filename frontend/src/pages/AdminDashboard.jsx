@@ -184,7 +184,7 @@ const AdminDashboard = () => {
               <div style={{ marginBottom: '1rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Product Image</label>
                 <input type="file" accept="image/*" onChange={handleImageUpload} style={{ background: 'transparent', padding: 0 }} />
-                {formData.image && <img src={`http://localhost:5000${formData.image}`} alt="Preview" style={{ height: '60px', marginTop: '0.5rem', borderRadius: '4px' }} />}
+                {formData.image && <img src={`${(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api').replace('/api', '')}${formData.image}`} alt="Preview" style={{ height: '60px', marginTop: '0.5rem', borderRadius: '4px' }} />}
               </div>
 
               <textarea placeholder="Description" required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>

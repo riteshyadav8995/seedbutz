@@ -28,7 +28,7 @@ const ProductDetail = () => {
         {/* Image Placeholder or Actual Image */}
         <div className="glass-panel" style={{ height: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 0 }}>
           {product.image ? (
-            <img src={`http://localhost:5000${product.image}`} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={`${(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api').replace('/api', '')}${product.image}`} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <span style={{ fontSize: '8rem' }}>🌰</span>
           )}
