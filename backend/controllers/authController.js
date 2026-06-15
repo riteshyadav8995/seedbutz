@@ -27,7 +27,11 @@ exports.sendOtp = async (req, res) => {
     otpStore.set(email, { otp, expiresAt: Date.now() + 5 * 60 * 1000 });
 
     if (method === 'email') {
-      await sendOtpEmail(email, otp);
+      try {
+        await sendOtpEmail(email, otp);
+      } catch (err) {
+        return res.status(500).json({ message: 'Failed to send OTP email. Check your EMAIL_USER/EMAIL_PASS credentials.', error: err.message });
+      }
     } else {
       // Mock SMS
       console.log(`[MOCK SMS] Sending OTP ${otp} to mobile ${mobile_no}`);
