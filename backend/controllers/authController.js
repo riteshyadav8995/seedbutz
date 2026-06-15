@@ -30,7 +30,7 @@ exports.sendOtp = async (req, res) => {
       try {
         await sendOtpEmail(email, otp);
       } catch (err) {
-        return res.status(500).json({ message: 'Failed to send OTP email. Check your EMAIL_USER/EMAIL_PASS credentials.', error: err.message });
+        return res.status(500).json({ message: 'Some issue occurred while sending OTP. Please try again.', error: err.message });
       }
     } else {
       // Mock SMS

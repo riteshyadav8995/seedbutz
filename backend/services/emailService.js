@@ -3,7 +3,9 @@ const nodemailer = require('nodemailer');
 const sendEmail = async (options) => {
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // Or use another service. For demo, we might just mock this or use ethereal.
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
@@ -27,7 +29,9 @@ const sendEmail = async (options) => {
 const sendOtpEmail = async (email, otp) => {
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
@@ -52,7 +56,9 @@ const sendOtpEmail = async (email, otp) => {
 const sendPaymentEmail = async (email, subject, text) => {
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
