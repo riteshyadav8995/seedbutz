@@ -20,6 +20,9 @@ const AdminDashboard = () => {
   // Settings new field states
   const [newContactField, setNewContactField] = useState({ id: '', label: '', type: 'text', required: false });
   const [newOptionValue, setNewOptionValue] = useState({ type: '', flavor: '', dietary: '' });
+  
+  // URL Input State
+  const [newImageUrl, setNewImageUrl] = useState('');
 
   useEffect(() => {
     fetchProducts();
@@ -146,22 +149,16 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleImageUpload = async (e) => {
-    const files = Array.from(e.target.files);
-    if(files.length === 0) return;
-    
-    const uploadData = new FormData();
-    files.forEach(file => uploadData.append('images', file));
-    
-    try {
-      const res = await api.post('/upload', uploadData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      setFormData({ ...formData, images: res.data.imageUrls, image: res.data.imageUrls[0] });
-    } catch (err) {
-      console.error(err);
-      alert('Failed to upload image');
-    }
+  const handleAddImageUrl = (e) => {
+    e.preventDefault();
+    if(!newImageUrl) return;
+    setFormData({ ...formData, images: [...formData.images, newImageUrl], image: formData.images.length === 0 ? newImageUrl : formData.image });
+    setNewImageUrl('');
+  };
+
+  const removeImageUrl = (indexToRemove) => {
+    const updatedImages = formData.images.filter((_, idx) => idx !== indexToRemove);
+    setFormData({ ...formData, images: updatedImages, image: updatedImages.length > 0 ? updatedImages[0] : '' });
   };
 
   const getImageUrl = (imagePath) => {
@@ -190,15 +187,24 @@ const AdminDashboard = () => {
               <input type="text" placeholder="Name" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
               
               <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Product Images</label>
-                <input type="file" accept="image/*" multiple onChange={handleImageUpload} style={{ background: 'transparent', padding: 0 }} />
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Product Image URLs</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input type="text" placeholder="Paste image URL here" value={newImageUrl} onChange={e => setNewImageUrl(e.target.value)} style={{ flex: 1 }} />
+                  <button onClick={handleAddImageUrl} type="button" className="btn btn-outline">Add URL</button>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
                   {formData.images && formData.images.length > 0 ? (
                     formData.images.map((img, idx) => (
-                      <img key={idx} src={getImageUrl(img)} alt={`Preview ${idx}`} style={{ height: '60px', borderRadius: '4px' }} />
+                      <div key={idx} style={{ position: 'relative' }}>
+                        <img src={getImageUrl(img)} alt={`Preview ${idx}`} style={{ height: '60px', borderRadius: '4px' }} />
+                        <button type="button" onClick={() => removeImageUrl(idx)} style={{ position: 'absolute', top: -5, right: -5, background: '#ff6b6b', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>&times;</button>
+                      </div>
                     ))
                   ) : formData.image ? (
-                    <img src={getImageUrl(formData.image)} alt="Preview" style={{ height: '60px', borderRadius: '4px' }} />
+                    <div style={{ position: 'relative' }}>
+                      <img src={getImageUrl(formData.image)} alt="Preview" style={{ height: '60px', borderRadius: '4px' }} />
+                    </div>
                   ) : null}
                 </div>
               </div>

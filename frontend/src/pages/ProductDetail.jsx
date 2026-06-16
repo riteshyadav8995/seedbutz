@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api';
 import { useCart } from '../context/CartContext';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -32,14 +33,39 @@ const ProductDetail = () => {
 
   if (!product) return <div className="container" style={{ padding: '5rem 0', textAlign: 'center' }}>Loading...</div>;
 
+  const allImages = (product?.images && product.images.length > 0) ? product.images : (product?.image ? [product.image] : []);
+  const activeIndex = allImages.indexOf(activeImage);
+
+  const handlePrev = () => {
+    if (activeIndex > 0) setActiveImage(allImages[activeIndex - 1]);
+    else setActiveImage(allImages[allImages.length - 1]);
+  };
+
+  const handleNext = () => {
+    if (activeIndex < allImages.length - 1) setActiveImage(allImages[activeIndex + 1]);
+    else setActiveImage(allImages[0]);
+  };
+
   return (
     <div className="container fade-in-up" style={{ padding: '4rem 0' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem' }}>
         {/* Image Placeholder or Actual Image */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div className="glass-panel" style={{ height: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 0 }}>
+          <div className="glass-panel" style={{ height: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 0, position: 'relative' }}>
             {activeImage ? (
-              <img src={getImageUrl(activeImage)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <>
+                <img src={getImageUrl(activeImage)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {allImages.length > 1 && (
+                  <>
+                    <button onClick={handlePrev} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', color: 'white', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                      <ChevronLeft />
+                    </button>
+                    <button onClick={handleNext} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', color: 'white', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                      <ChevronRight />
+                    </button>
+                  </>
+                )}
+              </>
             ) : (
               <span style={{ fontSize: '8rem' }}>🌰</span>
             )}

@@ -13,7 +13,6 @@ const messageRoutes = require('./routes/messageRoutes');
 const productRoutes = require('./routes/productRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
-const uploadRoutes = require('./routes/uploadRoutes');
 const path = require('path');
 
 const app = express();
@@ -26,10 +25,6 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/settings', settingsRoutes);
-app.use('/api/upload', uploadRoutes);
-
-// Make uploads folder static
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
