@@ -5,6 +5,8 @@ import ProductCard from '../components/ProductCard';
 const Catalog = () => {
   const [products, setProducts] = useState([]);
   const [filters, setFilters] = useState({ type: '', flavor: '', dietaryRestrictions: '' });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState('');
 
   useEffect(() => {
     fetchProducts();
@@ -68,17 +70,47 @@ const Catalog = () => {
           </div>
         </div>
 
-        {/* Product Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-          {products.length > 0 ? (
-            products.map(product => (
-              <ProductCard key={product._id} product={product} />
-            ))
-          ) : (
-            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-              No products found matching your filters.
-            </div>
-          )}
+        {/* Main Content Area */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          
+          {/* Top Control Bar: Search & Sort */}
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+            <input 
+              type="text" 
+              placeholder="Search products by name..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ flex: '1 1 300px', margin: 0 }}
+            />
+            <select 
+              value={sortOrder} 
+              onChange={(e) => setSortOrder(e.target.value)}
+              style={{ flex: '0 0 200px', margin: 0 }}
+            >
+              <option value="">Sort by Price</option>
+              <option value="lowToHigh">Price: Low to High</option>
+              <option value="highToLow">Price: High to Low</option>
+            </select>
+          </div>
+
+          {/* Product Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
+            {(() => {
+              let displayedProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+              if (sortOrder === 'lowToHigh') displayedProducts.sort((a, b) => a.price - b.price);
+              else if (sortOrder === 'highToLow') displayedProducts.sort((a, b) => b.price - a.price);
+
+              return displayedProducts.length > 0 ? (
+                displayedProducts.map(product => (
+                  <ProductCard key={product._id} product={product} />
+                ))
+              ) : (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                  No products found matching your search or filters.
+                </div>
+              );
+            })()}
+          </div>
         </div>
       </div>
     </div>

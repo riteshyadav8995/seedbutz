@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api';
 import { useCart } from '../context/CartContext';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, AlertTriangle } from 'lucide-react';
+import ProductCard from '../components/ProductCard';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [activeImage, setActiveImage] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
@@ -24,6 +26,11 @@ const ProductDetail = () => {
         const res = await api.get(`/products/${id}`);
         setProduct(res.data);
         setActiveImage(res.data.images && res.data.images.length > 0 ? res.data.images[0] : res.data.image);
+
+        if (res.data && res.data.type) {
+          const relatedRes = await api.get(`/products?type=${res.data.type}`);
+          setRelatedProducts(relatedRes.data.filter(p => p._id !== id).slice(0, 4));
+        }
       } catch (error) {
         console.error('Error fetching product:', error);
       }
@@ -93,7 +100,17 @@ const ProductDetail = () => {
         {/* Details */}
         <div>
           <span style={{ color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 600 }}>{product.type} / {product.flavor}</span>
-          <h1 style={{ fontSize: '3rem', margin: '0.5rem 0 1rem 0' }}>{product.name}</h1>
+          <h1 style={{ fontSize: '3rem', margin: '0.5rem 0 0.5rem 0' }}>{product.name}</h1>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginBottom: '1rem', color: '#ffb400' }}>
+            <Star size={18} fill="currentColor" />
+            <Star size={18} fill="currentColor" />
+            <Star size={18} fill="currentColor" />
+            <Star size={18} fill="currentColor" />
+            <Star size={18} fill="currentColor" />
+            <span style={{ color: 'var(--text-muted)', fontSize: '1rem', marginLeft: '8px' }}>4.8 (124 reviews)</span>
+          </div>
+
           <p style={{ fontSize: '2rem', fontWeight: 300, marginBottom: '2rem' }}>₹{product.price.toFixed(2)}</p>
           
           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '2rem', lineHeight: 1.8 }}>
@@ -117,17 +134,39 @@ const ProductDetail = () => {
               <h3 style={{ borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Ingredients</h3>
               <p style={{ color: 'var(--text-muted)' }}>{product.ingredients || '100% natural seed nuts.'}</p>
               
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {product.dietaryRestrictions?.map((restriction, index) => (
-                  <span key={index} style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--accent-gold)', padding: '0.2rem 0.8rem', borderRadius: '20px', fontSize: '0.8rem' }}>
-                    {restriction}
-                  </span>
-                ))}
+                <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  {product.dietaryRestrictions?.map((restriction, index) => (
+                    <span key={index} style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--accent-gold)', padding: '0.2rem 0.8rem', borderRadius: '20px', fontSize: '0.8rem' }}>
+                      {restriction}
+                    </span>
+                  ))}
+                </div>
               </div>
+            </div>
+
+            {/* Allergen Warning */}
+            <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255, 107, 107, 0.05)', borderLeft: '4px solid #ff6b6b', borderRadius: '0 8px 8px 0' }}>
+              <h4 style={{ color: '#ff6b6b', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <AlertTriangle size={18} /> Allergen Warning
+              </h4>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: 0 }}>
+                Processed in a facility that also handles peanuts, tree nuts, wheat, and soy. May contain trace amounts.
+              </p>
             </div>
           </div>
         </div>
-      </div>
+
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <div style={{ marginTop: '6rem', borderTop: '1px solid var(--glass-border)', paddingTop: '4rem' }}>
+          <h2 style={{ marginBottom: '2rem', textAlign: 'center' }}>You Might Also Like</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
+            {relatedProducts.map(rp => (
+              <ProductCard key={rp._id} product={rp} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

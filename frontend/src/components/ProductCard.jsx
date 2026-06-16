@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const ProductCard = ({ product }) => {
@@ -24,12 +25,22 @@ const ProductCard = ({ product }) => {
           <span style={{ fontSize: '3rem' }}>🌰</span>
         )}
       </div>
-      <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '1px' }}>{product.type}</span>
-          <span style={{ fontWeight: 600 }}>₹{product.price.toFixed(2)}</span>
+      <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>{product.type}</span>
+          <span style={{ fontWeight: 800, fontSize: '1.2rem' }}>₹{product.price.toFixed(2)}</span>
         </div>
-        <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem' }}>{product.name}</h3>
+        
+        <h3 style={{ marginBottom: '0.5rem', fontSize: '1.3rem' }}>{product.name}</h3>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginBottom: '1rem', color: '#ffb400' }}>
+          <Star size={14} fill="currentColor" />
+          <Star size={14} fill="currentColor" />
+          <Star size={14} fill="currentColor" />
+          <Star size={14} fill="currentColor" />
+          <Star size={14} fill="currentColor" />
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginLeft: '6px' }}>(124)</span>
+        </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', flexGrow: 1 }}>
           {product.description.substring(0, 60)}...
         </p>
