@@ -26,14 +26,15 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 // @route   POST /api/upload
-// @desc    Upload image
+// @desc    Upload images
 // @access  Private/Admin
-router.post('/', verifyToken, isAdmin, upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No file uploaded' });
+router.post('/', verifyToken, isAdmin, upload.array('images', 5), (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: 'No files uploaded' });
   }
-  // req.file.path contains the absolute Cloudinary URL
-  res.json({ imageUrl: req.file.path });
+  // req.files is an array of files, we extract the Cloudinary URL from each
+  const imageUrls = req.files.map(file => file.path);
+  res.json({ imageUrls });
 });
 
 module.exports = router;

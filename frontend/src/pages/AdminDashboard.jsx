@@ -14,7 +14,7 @@ const AdminDashboard = () => {
   // Product form
   const [formData, setFormData] = useState({
     name: '', description: '', price: '', type: 'Roasted', flavor: '', dietaryRestrictions: '',
-    nutritionFacts: { calories: '', fat: '', protein: '', carbs: '' }, ingredients: '', image: ''
+    nutritionFacts: { calories: '', fat: '', protein: '', carbs: '' }, ingredients: '', image: '', images: []
   });
 
   // Settings new field states
@@ -72,7 +72,7 @@ const AdminDashboard = () => {
   const resetForm = () => {
     setFormData({
       name: '', description: '', price: '', type: 'Roasted', flavor: '', dietaryRestrictions: '',
-      nutritionFacts: { calories: '', fat: '', protein: '', carbs: '' }, ingredients: '', image: ''
+      nutritionFacts: { calories: '', fat: '', protein: '', carbs: '' }, ingredients: '', image: '', images: []
     });
     setEditingProductId(null);
   };
@@ -87,7 +87,8 @@ const AdminDashboard = () => {
       dietaryRestrictions: Array.isArray(p.dietaryRestrictions) ? p.dietaryRestrictions.join(', ') : (p.dietaryRestrictions || ''),
       nutritionFacts: p.nutritionFacts || { calories: '', fat: '', protein: '', carbs: '' },
       ingredients: p.ingredients || '',
-      image: p.image || ''
+      image: p.image || '',
+      images: p.images || []
     });
     setEditingProductId(p._id);
   };
@@ -146,22 +147,29 @@ const AdminDashboard = () => {
   };
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
+    const files = Array.from(e.target.files);
+    if(files.length === 0) return;
     
     const uploadData = new FormData();
-    uploadData.append('image', file);
+    files.forEach(file => uploadData.append('images', file));
     
     try {
-      // Set a temporary loading state if desired
       const res = await api.post('/upload', uploadData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      setFormData({ ...formData, image: res.data.imageUrl });
+      setFormData({ ...formData, images: res.data.imageUrls, image: res.data.imageUrls[0] });
     } catch (err) {
       console.error(err);
       alert('Failed to upload image');
     }
+  };
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http')) return imagePath;
+    const baseUrl = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+    const normalizedPath = imagePath.replace(/\\/g, '/');
+    return `${baseUrl}${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
   };
 
   return (
@@ -182,9 +190,17 @@ const AdminDashboard = () => {
               <input type="text" placeholder="Name" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
               
               <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Product Image</label>
-                <input type="file" accept="image/*" onChange={handleImageUpload} style={{ background: 'transparent', padding: 0 }} />
-                {formData.image && <img src={`${(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api').replace('/api', '')}${formData.image}`} alt="Preview" style={{ height: '60px', marginTop: '0.5rem', borderRadius: '4px' }} />}
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Product Images</label>
+                <input type="file" accept="image/*" multiple onChange={handleImageUpload} style={{ background: 'transparent', padding: 0 }} />
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                  {formData.images && formData.images.length > 0 ? (
+                    formData.images.map((img, idx) => (
+                      <img key={idx} src={getImageUrl(img)} alt={`Preview ${idx}`} style={{ height: '60px', borderRadius: '4px' }} />
+                    ))
+                  ) : formData.image ? (
+                    <img src={getImageUrl(formData.image)} alt="Preview" style={{ height: '60px', borderRadius: '4px' }} />
+                  ) : null}
+                </div>
               </div>
 
               <textarea placeholder="Description" required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>

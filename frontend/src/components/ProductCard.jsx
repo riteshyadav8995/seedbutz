@@ -13,11 +13,13 @@ const ProductCard = ({ product }) => {
     return `${baseUrl}${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
   };
 
+  const primaryImage = product.images && product.images.length > 0 ? product.images[0] : product.image;
+
   return (
     <div className="glass-panel" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ height: '200px', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-        {product.image ? (
-          <img src={getImageUrl(product.image)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {primaryImage ? (
+          <img src={getImageUrl(primaryImage)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
           <span style={{ fontSize: '3rem' }}>🌰</span>
         )}

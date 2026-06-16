@@ -7,6 +7,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
+  const [activeImage, setActiveImage] = useState(null);
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
@@ -21,6 +22,7 @@ const ProductDetail = () => {
       try {
         const res = await api.get(`/products/${id}`);
         setProduct(res.data);
+        setActiveImage(res.data.images && res.data.images.length > 0 ? res.data.images[0] : res.data.image);
       } catch (error) {
         console.error('Error fetching product:', error);
       }
@@ -34,11 +36,31 @@ const ProductDetail = () => {
     <div className="container fade-in-up" style={{ padding: '4rem 0' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem' }}>
         {/* Image Placeholder or Actual Image */}
-        <div className="glass-panel" style={{ height: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 0 }}>
-          {product.image ? (
-            <img src={getImageUrl(product.image)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            <span style={{ fontSize: '8rem' }}>🌰</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="glass-panel" style={{ height: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 0 }}>
+            {activeImage ? (
+              <img src={getImageUrl(activeImage)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <span style={{ fontSize: '8rem' }}>🌰</span>
+            )}
+          </div>
+          {/* Thumbnail Gallery */}
+          {((product.images && product.images.length > 0) ? product.images : (product.image ? [product.image] : [])).length > 1 && (
+            <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+              {((product.images && product.images.length > 0) ? product.images : [product.image]).map((img, idx) => (
+                <div 
+                  key={idx} 
+                  onClick={() => setActiveImage(img)} 
+                  style={{ 
+                    width: '80px', height: '80px', flexShrink: 0, cursor: 'pointer', 
+                    border: activeImage === img ? '2px solid var(--accent-gold)' : '2px solid transparent', 
+                    borderRadius: '8px', overflow: 'hidden' 
+                  }}
+                >
+                  <img src={getImageUrl(img)} alt={`${product.name} ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              ))}
+            </div>
           )}
         </div>
         
