@@ -1,6 +1,7 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const User = require('../models/User');
+const Order = require('../models/Order');
 const emailService = require('../services/emailService');
 
 exports.createOrder = async (req, res) => {
@@ -41,8 +42,23 @@ exports.verifyPayment = async (req, res) => {
       .update(sign.toString())
       .digest("hex");
 
-    if (razorpay_signature === expectedSign) {
+      if (razorpay_signature === expectedSign) {
       // Payment is successfully verified
+      const { items } = req.body;
+
+      try {
+        if (items && items.length > 0) {
+          const newOrder = new Order({
+            user: req.user.userId,
+            products: items,
+            razorpay_order_id,
+            razorpay_payment_id
+          });
+          await newOrder.save();
+        }
+      } catch (err) {
+        console.error("Failed to save order:", err);
+      }
       
       // Try to send email to user
       try {

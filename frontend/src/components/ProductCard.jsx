@@ -34,12 +34,10 @@ const ProductCard = ({ product }) => {
         <h3 style={{ marginBottom: '0.5rem', fontSize: '1.3rem' }}>{product.name}</h3>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginBottom: '1rem', color: '#ffb400' }}>
-          <Star size={14} fill="currentColor" />
-          <Star size={14} fill="currentColor" />
-          <Star size={14} fill="currentColor" />
-          <Star size={14} fill="currentColor" />
-          <Star size={14} fill="currentColor" />
-          <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginLeft: '6px' }}>(124)</span>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star key={star} size={14} fill={star <= (product.rating || 0) ? "currentColor" : "none"} stroke={star <= (product.rating || 0) ? "none" : "currentColor"} />
+          ))}
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginLeft: '6px' }}>({product.numReviews || 0})</span>
         </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', flexGrow: 1 }}>
           {product.description.substring(0, 60)}...

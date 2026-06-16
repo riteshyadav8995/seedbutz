@@ -11,6 +11,8 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [activeImage, setActiveImage] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
@@ -37,6 +39,33 @@ const ProductDetail = () => {
     };
     fetchProduct();
   }, [id]);
+
+  const submitReviewHandler = async (e) => {
+    e.preventDefault();
+    if (!localStorage.getItem('token')) {
+      alert('Please login to submit a review');
+      return;
+    }
+    if (rating === 0) {
+      alert('Please select a rating');
+      return;
+    }
+    try {
+      await api.post(`/products/${id}/reviews`, {
+        rating,
+        comment,
+        name: localStorage.getItem('userName') || 'User'
+      });
+      alert('Review submitted successfully!');
+      // Refresh product
+      const res = await api.get(`/products/${id}`);
+      setProduct(res.data);
+      setRating(0);
+      setComment('');
+    } catch (error) {
+      alert(error.response?.data?.message || 'Error submitting review');
+    }
+  };
 
   if (!product) return <div className="container" style={{ padding: '5rem 0', textAlign: 'center' }}>Loading...</div>;
 
@@ -103,12 +132,12 @@ const ProductDetail = () => {
           <h1 style={{ fontSize: '3rem', margin: '0.5rem 0 0.5rem 0' }}>{product.name}</h1>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginBottom: '1rem', color: '#ffb400' }}>
-            <Star size={18} fill="currentColor" />
-            <Star size={18} fill="currentColor" />
-            <Star size={18} fill="currentColor" />
-            <Star size={18} fill="currentColor" />
-            <Star size={18} fill="currentColor" />
-            <span style={{ color: 'var(--text-muted)', fontSize: '1rem', marginLeft: '8px' }}>4.8 (124 reviews)</span>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star key={star} size={18} fill={star <= (product.rating || 0) ? "currentColor" : "none"} stroke={star <= (product.rating || 0) ? "none" : "currentColor"} />
+            ))}
+            <span style={{ color: 'var(--text-muted)', fontSize: '1rem', marginLeft: '8px' }}>
+              {product.rating ? product.rating.toFixed(1) : 0} ({product.numReviews || 0} reviews)
+            </span>
           </div>
 
           <p style={{ fontSize: '2rem', fontWeight: 300, marginBottom: '2rem' }}>₹{product.price.toFixed(2)}</p>
@@ -155,6 +184,72 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
+
+      {/* Reviews Section */}
+      <div style={{ marginTop: '5rem', borderTop: '1px solid var(--glass-border)', paddingTop: '3rem' }}>
+        <h2 style={{ marginBottom: '2rem' }}>Customer Reviews</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem' }}>
+          
+          {/* Write a Review */}
+          <div className="glass-panel">
+            <h3 style={{ marginBottom: '1.5rem', color: 'var(--accent-gold)' }}>Write a Review</h3>
+            <form onSubmit={submitReviewHandler}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Rating</label>
+                <div style={{ display: 'flex', gap: '0.5rem', color: '#ffb400' }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star 
+                      key={star} 
+                      size={24} 
+                      onClick={() => setRating(star)} 
+                      style={{ cursor: 'pointer' }}
+                      fill={star <= rating ? "currentColor" : "none"} 
+                      stroke={star <= rating ? "none" : "currentColor"} 
+                    />
+                  ))}
+                </div>
+              </div>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Comment</label>
+                <textarea 
+                  rows="4" 
+                  value={comment} 
+                  onChange={(e) => setComment(e.target.value)} 
+                  required 
+                  placeholder="Share your thoughts about this product..."
+                />
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Submit Review</button>
+            </form>
+          </div>
+
+          {/* Existing Reviews */}
+          <div>
+            {product.reviews && product.reviews.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {product.reviews.map((review, index) => (
+                  <div key={index} style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <strong style={{ color: 'var(--accent-gold)' }}>{review.name}</strong>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{review.createdAt ? review.createdAt.substring(0, 10) : ''}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginBottom: '1rem', color: '#ffb400' }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star key={star} size={12} fill={star <= review.rating ? "currentColor" : "none"} stroke={star <= review.rating ? "none" : "currentColor"} />
+                      ))}
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                <p>No reviews yet. Be the first to review this product!</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Related Products Section */}
       {relatedProducts.length > 0 && (

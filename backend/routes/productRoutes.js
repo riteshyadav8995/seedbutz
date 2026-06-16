@@ -5,6 +5,7 @@ const { verifyToken, isAdmin } = require('../middleware/auth');
 
 router.get('/', productController.getAllProducts);
 router.get('/:id', productController.getProductById);
+router.post('/:id/reviews', verifyToken, productController.createProductReview);
 
 // Admin only routes
 router.post('/', verifyToken, isAdmin, productController.createProduct);
