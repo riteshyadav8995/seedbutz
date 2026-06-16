@@ -3,35 +3,27 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { verifyToken, isAdmin } = require('../middleware/auth');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, 'uploads/'); // Ensure this folder exists or is created automatically by multer (multer does create it if using diskStorage properly)
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Configure Cloudinary Storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'seednutz_products',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    public_id: (req, file) => `product-${Date.now()}`,
   },
-  filename(req, file, cb) {
-    cb(null, `product-${Date.now()}${path.extname(file.originalname)}`);
-  }
 });
 
-const checkFileType = (file, cb) => {
-  const filetypes = /jpg|jpeg|png|webp/;
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
-
-  if (extname && mimetype) {
-    return cb(null, true);
-  } else {
-    cb('Images only!');
-  }
-};
-
-const upload = multer({
-  storage,
-  fileFilter: function (req, file, cb) {
-    checkFileType(file, cb);
-  }
-});
+const upload = multer({ storage });
 
 // @route   POST /api/upload
 // @desc    Upload image
@@ -40,7 +32,8 @@ router.post('/', verifyToken, isAdmin, upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
   }
-  res.json({ imageUrl: `/uploads/${req.file.filename}` });
+  // req.file.path contains the absolute Cloudinary URL
+  res.json({ imageUrl: req.file.path });
 });
 
 module.exports = router;
