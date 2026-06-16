@@ -4,11 +4,20 @@ import { useCart } from '../context/CartContext';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http')) return imagePath;
+    const baseUrl = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+    const normalizedPath = imagePath.replace(/\\/g, '/');
+    return `${baseUrl}${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
+  };
+
   return (
     <div className="glass-panel" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ height: '200px', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         {product.image ? (
-          <img src={`${(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api').replace('/api', '')}${product.image}`} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={getImageUrl(product.image)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
           <span style={{ fontSize: '3rem' }}>🌰</span>
         )}

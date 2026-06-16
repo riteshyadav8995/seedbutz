@@ -8,6 +8,14 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
 
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http')) return imagePath;
+    const baseUrl = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+    const normalizedPath = imagePath.replace(/\\/g, '/');
+    return `${baseUrl}${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
+  };
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -28,7 +36,7 @@ const ProductDetail = () => {
         {/* Image Placeholder or Actual Image */}
         <div className="glass-panel" style={{ height: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 0 }}>
           {product.image ? (
-            <img src={`${(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api').replace('/api', '')}${product.image}`} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={getImageUrl(product.image)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <span style={{ fontSize: '8rem' }}>🌰</span>
           )}

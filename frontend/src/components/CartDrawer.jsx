@@ -9,6 +9,10 @@ const CartDrawer = () => {
   if (!isCartOpen) return null;
 
   const handleCheckout = async () => {
+    if (!localStorage.getItem('token')) {
+      alert('please login first');
+      return;
+    }
     try {
       const res = await api.post('/payment/create-order', { amount: cartTotal });
       

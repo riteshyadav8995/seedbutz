@@ -30,6 +30,10 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!localStorage.getItem('token')) {
+      alert('please login first');
+      return;
+    }
     setStatus('Sending...');
     
     // Separate standard fields (name, email, subject, message) from customData
